@@ -10,6 +10,25 @@ import numpy as np
 from .base import DynSys, DynSysDelay, staticjit
 
 
+class UnifiedENSO(DynSys):
+    @staticjit
+    def _rhs(T, h, tau1, tau2, t, a, b1, b2, b3, c, d, e, eta, mu, _lambda, delta, epsilon, Rtau1, Rtau2, Rh):
+        Tdot = a * tau1 - b1 * tau1 * (t - eta) + b2 * tau2 * (t - delta) - b3 * tau1 * (t - mu) - epsilon * T**3
+        hdot = -c * tau1 * (t - _lambda) - Rh * h
+        tau1dot = d * T - Rtau1 * tau1
+        tau2dot = e * h - Rtau2 * tau2
+        return Tdot, hdot, tau1dot, tau2dot
+    # Define the jacobian given the previous function
+    # @staticjit
+    # def _jac(T, h, tau1, tau2, t, a, b1, b2, b3, c, d, e, eta, mu, _lambda, delta, epsilon, Rtau1, Rtau2, Rh):
+    #     row1 = [-3 * epsilon * T**2, 0, a - b1 * (t - eta), b2 * (t - delta), 0]
+    #     row2 = [0, -Rh, 0, 0, -c * (t - _lambda)]
+    #     row3 = [d, 0, -Rtau1, 0, 0]
+    #     row4 = [0, e, 0, -Rtau2, 0]
+    #     return row1, row2, row3, row4
+        
+    
+
 class Lorenz(DynSys):
     @staticjit
     def _rhs(x, y, z, t, beta, rho, sigma):
